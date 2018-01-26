@@ -19,6 +19,9 @@ strtime = "%Y-%m-%d-%M-%S"
 markets = [bc + "/" + quotecoin for bc in basecoins]
 market_names = [bc + "_" + quotecoin for bc in basecoins]
 
+#whether to save streaming data locally or to RDS
+local = False
+
 #create an object for each exchange as we add them; custom funcs to handle each inner data discrepancies
 #then we call a registrar that inits and holds all of the exchange objects
 #we should be able to call the registrar & a coin, it should return all the available markets for the coin
