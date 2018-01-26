@@ -5,6 +5,7 @@ import sqlite3
 import os.path
 from datetime import datetime 
 import time
+import pymysql
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,6 +23,31 @@ market_names = [bc + "_" + quotecoin for bc in basecoins]
 #then we call a registrar that inits and holds all of the exchange objects
 #we should be able to call the registrar & a coin, it should return all the available markets for the coin
 
+class Database(object):
+
+    def __init__(self, local_bool):
+        if local_bool:
+            bc_conn = sqlite3.connect(basecoin_fp)
+            bc_c = bc_conn.cursor()
+        else:
+            import config
+            bc_conn = pymysql.connect(config.host, user=config.user, port=config.port, passwd=config.password,
+                    db=config.dbname)
+            bc_c = bc_conn.cursor()
+
+
+        self.conn = bc_conn
+        self.cur = bc_c
+
+    def close_db(self):
+        self.cur.close()
+        self.conn.close()
+
+    def get_cursor():
+        return self.cur
+
+    def get_connection():
+        return self.conn
 
 class Basecoin_monitor(object):
     """
@@ -29,27 +55,21 @@ class Basecoin_monitor(object):
     """
 
     def __init__(self):
-        #connect to database or create if none exists
-        if not os.path.isfile(basecoin_fp):
-            bc_conn = sqlite3.connect(basecoin_fp)
-            bc_c = bc_conn.cursor()
-            for name in market_names:
-                bc_c.execute("CREATE TABLE IF NOT EXISTS " + name + "(datestamp DATETIME, ask REAL, bid REAL)")
-                bc_conn.commit()
-        else:
-            bc_conn = sqlite3.connect(basecoin_fp)
-            bc_c = bc_conn.cursor()
+        db = Database(local)
+        self.db = db
 
-        self.conn = bc_conn
-        self.cur = bc_c
+
+        self.conn = db.get_connection()
+        self.cur = db.get_cursor()
 
         #begin connection with coinbase
         cb = Coinbase()
         self.cb = cb
 
-    def close_db(self):
-        self.cur.close()
-        self.conn.close()
+        #create tables if not there
+        for name in market_names:
+            self.cur.execute("CREATE TABLE IF NOT EXISTS " + name + "(datestamp DATETIME, ask REAL, bid REAL)")
+            self.conn.commit()
 
     def push_askbid(self, timestamp, askbid_dict):
         for name in market_names: 
@@ -64,10 +84,9 @@ class Basecoin_monitor(object):
                 if verbose:
                     print(askbid)
                 self.push_askbid(ts, askbid)
-                time.sleep(5)
+                time.sleep(3)
         finally:
-            self.close_db()
-
+            self.db.close_db()
 
 ### MAIN
 
