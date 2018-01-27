@@ -15,7 +15,7 @@ basecoin_fp = './basecoindata.db'
 basecoins = ['BTC','LTC','ETH']
 quotecoin = 'USD'
 max_latency = 5 
-strtime = "%Y-%m-%d-%M-%S"
+strtime = "%Y-%m-%d %H:%M:%S"
 markets = [bc + "/" + quotecoin for bc in basecoins]
 market_names = [bc + "_" + quotecoin for bc in basecoins]
 
@@ -46,10 +46,10 @@ class Database(object):
         self.cur.close()
         self.conn.close()
 
-    def get_cursor():
+    def get_cursor(self):
         return self.cur
 
-    def get_connection():
+    def get_connection(self):
         return self.conn
 
 class Basecoin_monitor(object):
@@ -77,13 +77,15 @@ class Basecoin_monitor(object):
     def push_askbid(self, timestamp, askbid_dict):
         for name in market_names: 
             (lowest_ask, highest_bid) = (askbid_dict[name]['ask'], askbid_dict[name]['bid'])
-            self.cur.execute("INSERT INTO " + name + " values (?, ?, ?)", (timestamp, lowest_ask, highest_bid))
+            insert_query = "INSERT INTO " + name + " values ({0}, {1}, {2})".format(timestamp, lowest_ask, highest_bid)
+            self.cur.execute(insert_query)
             self.conn.commit()
 
     def begin_stream(self, verbose=False):
         try:
             while(True):
                 ts, askbid = self.cb.grab_basecoins_askbid()
+                ts = ts.strftime(strtime)
                 if verbose:
                     print(askbid)
                 self.push_askbid(ts, askbid)
@@ -92,7 +94,6 @@ class Basecoin_monitor(object):
             self.db.close_db()
 
 ### MAIN
-
 bc = Basecoin_monitor()
 bc.begin_stream(True)
 
