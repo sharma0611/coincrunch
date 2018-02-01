@@ -2,7 +2,8 @@
 *.swp
 
 # your personalized configuration files
-config.py
+config/config.yaml
+
 # any of your data used for training/testing
 data/
 
