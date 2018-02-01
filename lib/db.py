@@ -1,14 +1,14 @@
 import psycopg2 as pg
-from lib.config import Config
+from config import Config
 
 class DB():
     def __init__(self):
         self._connection_parameters = {
-        'host': config.get_variable('db', 'host'),
-        'database': config.get_variable('db', 'database'),
-        'user': config.get_variable('db', 'user'),
-        'password': config.get_variable('db', 'password'),
-        'port':  int(config.get_variable('db', 'port')) }
+        'host': Config.get_variable('db', 'host'),
+        'database': Config.get_variable('db', 'database'),
+        'user': Config.get_variable('db', 'user'),
+        'password': Config.get_variable('db', 'password'),
+        'port':  int(Config.get_variable('db', 'port')) }
         self._conn = pg.connect(**self._connection_parameters)
         self._cursor = self._conn.cursor()
 
