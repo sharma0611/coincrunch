@@ -1,5 +1,5 @@
+#!/usr/bin/env python3
 
-import ccxt
 import pandas
 import os.path
 from datetime import datetime 
