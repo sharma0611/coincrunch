@@ -4,7 +4,7 @@ import pandas as pd
 from bokeh.models import ColumnDataSource, HoverTool, SaveTool, DatetimeTickFormatter
 from bokeh.models.widgets import TextInput, Button
 from bokeh.plotting import figure, curdoc
-from bokeh.layouts import row, widgetbox
+from bokeh.layouts import row, widgetbox, column
 from bokeh.palettes import Spectral11
 
 from lib.db import DB
@@ -18,6 +18,10 @@ display_exchanges = ["gdax"]
 #display_exchanges = []
 display_markets = []
 initial_window = 100000 #specify # of mins of data to initially grab
+
+#each market will take one plot
+#each data attribute will take one line; must match column name of data in db
+data_attributes = ["ask", "bid"]
 
 #grab dataframe we need
 #ensure exchanges are available
@@ -36,43 +40,40 @@ query = "SELECT * FROM " + exch + " WHERE datestamp BETWEEN '" + before.strftime
 db = DB()
 df = db.execute_and_grab_df(query)
 df.drop('market_sym', axis=1, inplace=True)
+curr_markets = df['market'].unique().tolist()
 pivot_df = df.pivot(index='datestamp', columns='market')
-ask_df = pivot_df['ask']
-bid_df = pivot_df['bid']
 
 #to hold {market_name: data_object}
 market_data_dict = {}
+market_plots = []
 
 #make a graph for each market
-for market in ask_df.columns.tolist():
-    market_ask_df = ask_df[[market]]
-    market_bid_df = bid_df[[market]]
-    market_ask_df.dropna(inplace=True)
-    market_bid_df.dropna(inplace=True)
-    xs = [market_ask_df.index.values, market_bid_df.index.values]
-    ys = [market_ask_df[market].values, market_bid_df[market].values]
-    market_data = ColumnDataSource(dict(xs=xs, ys=ys))
-    market_data_dict[market] = market_data
-    mypalette=Spectral11[0:2]
-
-    hover = HoverTool(tooltips=[
-        ("Time", "@datestamp")
-       # ("Ask", "@ask")
-       # ("Bid", "@bid")
-        ])
-
-    price_plot = figure(plot_width=800,
+for market in curr_markets:
+    #create a figure for the market
+    hover = HoverTool(tooltips=[("Time", "@x{%F}")])
+    market_plot = figure(plot_width=800,
                         plot_height=400,
                         x_axis_type='datetime',
                         tools=[hover, SaveTool()],
-                        title="Ask/Bid Plot: " + market )
+                        title= exch.upper() + " Data: " + market )
+    market_plot.xaxis.axis_label = "Time"
+    market_plot.yaxis.axis_label = "Price"
+    market_plot.title.text = "Real Time Data for " + market
 
-    price_plot.multi_line(xs='xs', ys='ys', source=market_data, line_width=5)
-    price_plot.xaxis.axis_label = "Time"
-    price_plot.yaxis.axis_label = "Cryptos Real-Time Price"
-    price_plot.title.text = "Cryptos Real Time Price"
+    mypalette=Spectral11[0:len(data_attributes)]
 
-    break
+    for idx, data_attr in enumerate(data_attributes):
+        #create a plot for each data attribute
+        curr_df = pivot_df[data_attr][[market]]
+        curr_df.dropna(inplace=True)
+        x = curr_df.index.values
+        y = curr_df[market].values
+        curr_data = ColumnDataSource(dict(x=x,y=y))
+        market_data_dict[(market, data_attr)] = curr_data
+        market_plot.line(x='x',y='y', source=curr_data, color=mypalette[idx], legend=data_attr.capitalize())
+
+    market_plots.append(market_plot)
+
 
 #base = "https://api.iextrading.com/1.0/"
 #
@@ -129,6 +130,6 @@ for market in ask_df.columns.tolist():
 
 #inputs = widgetbox([ticker_textbox, update], width=200)
 
-curdoc().add_root(row(price_plot, width=1600))
+curdoc().add_root(column(*market_plots, width=1600))
 curdoc().title = "Real-Time Price Plot from IEX"
 #curdoc().add_periodic_callback(update_price, 1000)
