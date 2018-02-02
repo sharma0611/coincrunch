@@ -1,5 +1,6 @@
 import psycopg2 as pg
 from lib.config import Config
+import pandas as pd
 
 class DB():
     def __init__(self):
@@ -18,6 +19,14 @@ class DB():
         except (AttributeError, pg.OperationalError):
             self.__reconnect__()
             self._cursor.execute(query=query)
+
+    def execute_and_grab_df(self, query):
+        try:
+            df = pd.read_sql(query, self._conn, parse_dates=['datestamp'])
+        except (AttributeError, pg.OperationalError):
+            self.__reconnect__()
+            df = pd.read_sql(query, self._conn)
+        return df
 
     def fetchone(self):
         return self._cursor.fetchone()
