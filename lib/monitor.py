@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from lib.DB import DB
+from lib.db import DB
 from lib.exchanges import init_exchange
+import time
 
 #metadata:
 # {exchange_name: [(base_coin, quote_coin), (base_coin, quote_coin), ... ]
@@ -39,8 +40,10 @@ class Monitor(object):
                 base_coin = market[0]
                 quote_coin = market[1]
                 curr_data = exch_obj.grab_data(base_coin, quote_coin)
-                insert_query = "INSERT INTO " + exch_name + " values ({0}, {1}, {2}, {3})".format(*curr_data)
+                insert_query = "INSERT INTO " + exch_name + " values ('{0}', {1}, {2}, '{3}', '{4}')".format(*curr_data)
                 self.db.execute(insert_query)
+                time.sleep(0.1)
+        self.db.commit()
 
 #    def push_askbid(self, timestamp, askbid_dict):
 #        for name in market_names: 

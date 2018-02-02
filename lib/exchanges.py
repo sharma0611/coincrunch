@@ -7,12 +7,12 @@ basecoin_fp = './basecoindata.db'
 basecoins = ['BTC','LTC','ETH']
 quotecoin = 'USD'
 max_latency = 5 
-strtime = "%Y-%m-%d-%M-%S"
+strtime = "%Y-%m-%d %H:%M:%S"
 markets = [bc + "/" + quotecoin for bc in basecoins]
 market_names = [bc + "_" + quotecoin for bc in basecoins]
 
 def init_exchange(exch_name):
-    if exch_name == "Coinbase":
+    if exch_name == "gdax":
         return Coinbase()
 
 #defining exchange class
@@ -35,13 +35,13 @@ class Exchange(object):
         end = datetime.now()
         latency = (end - start).seconds
         assert latency < max_latency
-        return [start] + curr_data + [basecoin + "/" + quotecoin, market_sym]
+        return [start.strftime(strtime)] + curr_data + [basecoin + "/" + quotecoin, market_sym]
 
     #we need to implement specific of what data to return in this fn:
     #should return: [ask, bid]
     def grab_market_data(self, market_sym):
         exch = self.exch
-        order_book = exch.fetch_order_market(market_sym)
+        order_book = exch.fetch_order_book(market_sym)
         asks = order_book['asks']
         bids = order_book['bids']
         lowest_ask = asks[0][0]
