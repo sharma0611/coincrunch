@@ -2,7 +2,7 @@
 *.swp
 
 # your personalized configuration files
-config/config.yaml
+config.cfg
 
 # any of your data used for training/testing
 data/
