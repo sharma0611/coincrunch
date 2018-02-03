@@ -35,6 +35,7 @@ class Monitor(object):
 
     #update database for each exchange & market 
     def update_data(self):
+        total_markets = 0
         # for each exchange
         for exch_name, exch_obj in self.exchanges_dict.items():
             # for each market
@@ -46,13 +47,17 @@ class Monitor(object):
                 while (curr_tries <= max_tries):
                     try:
                         curr_data = exch_obj.grab_data(base_coin, quote_coin)
+                        break
                     except Exception as e:
+                        curr_tries += 1
                         print("Failed to grab data. Error: " + str(e))
                         print("Attempt #: " + str(curr_tries))
                 insert_query = "INSERT INTO " + exch_name + " values ('{0}', {1}, {2}, '{3}', '{4}')".format(*curr_data)
                 self.db.execute(insert_query)
-                time.sleep(0.1)
+                total_markets += 1
         self.db.commit()
+
+        return total_markets
 
 #    def push_askbid(self, timestamp, askbid_dict):
 #        for name in market_names: 

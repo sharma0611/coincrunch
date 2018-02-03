@@ -2,6 +2,7 @@
 import ccxt
 from datetime import datetime
 import os.path
+import cfscrape
 
 basecoin_fp = './basecoindata.db'
 basecoins = ['BTC','LTC','ETH']
@@ -56,7 +57,11 @@ class Coinbase(Exchange):
     """
     def __init__(self):
         Exchange.__init__(self, "Coinbase")
-        exch = ccxt.gdax()
+        exch = getattr(ccxt, "gdax")({
+            'timeout': 20000,
+            'session': cfscrape.create_scraper(),
+            'enableRateLimit': True,
+        })
         exch.load_markets()
         self.exch = exch
 
