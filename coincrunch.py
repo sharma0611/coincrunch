@@ -6,6 +6,7 @@ from lib.logger import start_printer, end_printer
 import ast
 import time
 from datetime import datetime
+import traceback
 
 max_latency = 5 
 strtime = "%Y-%m-%d %H:%M:%S"
@@ -29,6 +30,7 @@ while True:
         print("Updated " + str(num_markets) + " markets in " + str((end-now).total_seconds()) + " s." )
     except Exception as e: 
         print("Encountered Exception: " + str(e))
+        print(traceback.format_exc())
         break
 
 end_printer()

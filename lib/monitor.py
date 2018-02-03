@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
+#print(traceback.format_exc())!/usr/bin/env python3
 
 from lib.db import DB
 from lib.exchanges import init_exchange
+from lib.multithread import run_methods_parallel
 import time
 
 #metadata:
@@ -33,30 +34,45 @@ class Monitor(object):
             #create tables for exchange
             self.db.execute("CREATE TABLE IF NOT EXISTS " + exchange_name + "(datestamp TIMESTAMP, ask REAL, bid REAL, market VARCHAR(14), market_sym VARCHAR(14))") #hard code what columns we want to record
 
+    #stage changes to DB; commit occurs in update_data
+    def update_data_exchanges(self, exch_name, exch_obj, exch_markets, temp_store=[]):
+        # for each market
+        for market in exch_markets:
+            base_coin = market[0]
+            quote_coin = market[1]
+            curr_tries = 1
+            while (curr_tries <= max_tries):
+                try:
+                    curr_data = exch_obj.grab_data(base_coin, quote_coin)
+                    break
+                except Exception as e:
+                    curr_tries += 1
+                    print("Failed to grab data. Error: " + str(e))
+                    print("Attempt #: " + str(curr_tries))
+            temp_store.append((exch_name, curr_data))
+
+    def post_data(self, temp_store):
+        for exch_name, curr_data in temp_store:
+            insert_query = "INSERT INTO " + exch_name + " values ('{0}', {1}, {2}, '{3}', '{4}')".format(*curr_data)
+            self.db.execute(insert_query)
+        self.db.commit()
+
     #update database for each exchange & market 
     def update_data(self):
         total_markets = 0
         # for each exchange
+        # create methods dict to run in parallel
+        methods_dict = {}
+        # create mutable temp data store for parallel processes to feed data to
+        temp_store = []
         for exch_name, exch_obj in self.exchanges_dict.items():
-            # for each market
             curr_markets = self.metadata[exch_name]
-            for market in curr_markets:
-                base_coin = market[0]
-                quote_coin = market[1]
-                curr_tries = 1
-                while (curr_tries <= max_tries):
-                    try:
-                        curr_data = exch_obj.grab_data(base_coin, quote_coin)
-                        break
-                    except Exception as e:
-                        curr_tries += 1
-                        print("Failed to grab data. Error: " + str(e))
-                        print("Attempt #: " + str(curr_tries))
-                insert_query = "INSERT INTO " + exch_name + " values ('{0}', {1}, {2}, '{3}', '{4}')".format(*curr_data)
-                self.db.execute(insert_query)
-                total_markets += 1
-        self.db.commit()
-
+            methods_dict[self.update_data_exchanges] = [exch_name, exch_obj, curr_markets, temp_store]
+            total_markets += len(curr_markets)
+        #run all exchanges in parrallel
+        run_methods_parallel(methods_dict)
+        #push data in temp store to database
+        self.post_data(temp_store)
         return total_markets
 
 #    def push_askbid(self, timestamp, askbid_dict):
