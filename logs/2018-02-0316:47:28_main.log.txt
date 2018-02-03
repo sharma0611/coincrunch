@@ -1,7 +1,0 @@
-707.0
-876.0
-870.0
-875.0
-856.0
-880.0
-Encountered Exception: must be str, not int
