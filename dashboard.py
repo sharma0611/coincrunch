@@ -17,7 +17,7 @@ strtime = "%Y-%m-%d %H:%M:%S"
 display_exchanges = ["gdax"]
 #display_exchanges = []
 display_markets = []
-initial_window = 100000 #specify # of mins of data to initially grab
+initial_window = 1200 #specify # of mins of data to initially grab
 
 #each market will take one plot
 #each data attribute will take one line; must match column name of data in db

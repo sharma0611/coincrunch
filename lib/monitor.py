@@ -9,6 +9,9 @@ import time
 #  exchange_name1 : <markets>
 #  ... }
 
+#max number of tries 
+max_tries = 5
+
 class Monitor(object):
     """
     Allows us to actively monitor certain coins on exchanges & updates values to database
@@ -39,7 +42,13 @@ class Monitor(object):
             for market in curr_markets:
                 base_coin = market[0]
                 quote_coin = market[1]
-                curr_data = exch_obj.grab_data(base_coin, quote_coin)
+                curr_tries = 1
+                while (curr_tries <= max_tries):
+                    try:
+                        curr_data = exch_obj.grab_data(base_coin, quote_coin)
+                    except Exception as e:
+                        print("Failed to grab data. Error: " + str(e))
+                        print("Attempt #: " + str(curr_tries))
                 insert_query = "INSERT INTO " + exch_name + " values ('{0}', {1}, {2}, '{3}', '{4}')".format(*curr_data)
                 self.db.execute(insert_query)
                 time.sleep(0.1)

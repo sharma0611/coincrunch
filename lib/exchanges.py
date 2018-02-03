@@ -6,7 +6,7 @@ import os.path
 basecoin_fp = './basecoindata.db'
 basecoins = ['BTC','LTC','ETH']
 quotecoin = 'USD'
-max_latency = 5 
+max_latency = 10
 strtime = "%Y-%m-%d %H:%M:%S"
 markets = [bc + "/" + quotecoin for bc in basecoins]
 market_names = [bc + "_" + quotecoin for bc in basecoins]
@@ -34,7 +34,8 @@ class Exchange(object):
         curr_data = self.grab_market_data(market_sym)
         end = datetime.now()
         latency = (end - start).seconds
-        assert latency < max_latency
+        if not latency < max_latency:
+            print("Warning: breached max latency on data pull")
         return [start.strftime(strtime)] + curr_data + [basecoin + "/" + quotecoin, market_sym]
 
     #we need to implement specific of what data to return in this fn:

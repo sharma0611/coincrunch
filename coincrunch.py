@@ -2,6 +2,7 @@
 
 from lib.monitor import Monitor
 from lib.config import Config
+from lib.logger import start_printer, end_printer
 import ast
 import time
 from datetime import datetime
@@ -18,10 +19,18 @@ metadata = Config.get_variable("monitor", "metadata")
 metadata = ast.literal_eval(metadata)
 mc = Monitor(metadata)
 
+start_printer("logs", datetime.now.strftime(strtime).replace(" ", "") + "_main.log")
+
 while True:
-    now = datetime.now()
-    mc.update_data()
-    end = datetime.now()
-    sleep_time = max(0, 5 - (end - now).total_seconds())
-    print(sleep_time)
-    time.sleep(sleep_time)
+    try:
+        now = datetime.now()
+        mc.update_data()
+        end = datetime.now()
+        sleep_time = max(0, 5 - (end - now).total_seconds())
+        print(sleep_time)
+        time.sleep(sleep_time)
+    except Exception as e: 
+        print("Encountered Exception: " + str(e))
+        break
+
+end_printer()
