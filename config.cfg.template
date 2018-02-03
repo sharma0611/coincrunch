@@ -1,0 +1,10 @@
+[db]
+host:
+port: 5432
+database: 
+user: 
+password: 
+
+[monitor]
+metadata: {'gdax': [('BCH','USD'), ('BTC','USD'), ('ETH','BTC'), ('ETH','USD'), ('LTC','BTC'), ('LTC','USD')]}
+#metadata: {'coinbase': [('BCH','BTC'), ('BCH','USD'), ('BTC','EUR'), ('BTC','GBP'), ('BTC','USD'), ('ETH','BTC'), ('ETH','EUR'), ('ETH','USD'), ('LTC','BTC'), ('LTC','EUR'), ('LTC','USD'), ('BCH','EUR')]}
