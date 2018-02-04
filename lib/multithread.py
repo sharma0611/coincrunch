@@ -1,16 +1,37 @@
-from multiprocessing import Pool, Process
+#from multiprocessing import Pipe, Process
 #from functools import partial
 
 #methods_dict: {class method : [args]}
 
-def run_methods_parallel(methods_dict):
+from threading import Thread
+
+class ThreadWithReturnValue(Thread):
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
+        Thread.__init__(self, group, target, name, args, kwargs, daemon=daemon)
+
+        self._return = None
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args, **self._kwargs)
+
+    def join(self):
+        Thread.join(self)
+        return self._return
+
+def run_methods_parallel(methods_arr):
     proc = []
-    for class_method, args in methods_dict.items():
-        p = Process(target=class_method, args=args)
+    results = []
+    for fn_and_args in methods_arr:
+        fn = fn_and_args[0]
+        args = fn_and_args[1:]
+        p = ThreadWithReturnValue(target=fn, args=args)
         p.start()
         proc.append(p)
     for p in proc:
-        p.join()
+        res = p.join() #ensure you are outputting an array
+        results = results + res #add up the arrays from all threads
+    return results
 
 #custom methods to allow multithreading of python class methods with parameters
 #def _pickle_method(method):

@@ -8,12 +8,8 @@ import time
 from datetime import datetime
 import traceback
 
-max_latency = 5 
 strtime = "%Y-%m-%d %H:%M:%S"
-basecoin_db_name = "basecoindata"
 local = False
-basecoins = ['BTC','LTC','ETH']
-quotecoin = 'USD'
 
 ### MAIN
 metadata = Config.get_variable("monitor", "metadata")

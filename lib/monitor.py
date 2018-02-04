@@ -1,9 +1,10 @@
-#print(traceback.format_exc())!/usr/bin/env python3
+#!/usr/bin/env python3
 
 from lib.db import DB
 from lib.exchanges import init_exchange
 from lib.multithread import run_methods_parallel
 import time
+import traceback
 
 #metadata:
 # {exchange_name: [(base_coin, quote_coin), (base_coin, quote_coin), ... ]
@@ -35,8 +36,9 @@ class Monitor(object):
             self.db.execute("CREATE TABLE IF NOT EXISTS " + exchange_name + "(datestamp TIMESTAMP, ask REAL, bid REAL, market VARCHAR(14), market_sym VARCHAR(14))") #hard code what columns we want to record
 
     #stage changes to DB; commit occurs in update_data
-    def update_data_exchanges(self, exch_name, exch_obj, exch_markets, temp_store=[]):
+    def update_data_exchanges(self, exch_name, exch_obj, exch_markets):
         # for each market
+        temp_store = []
         for market in exch_markets:
             base_coin = market[0]
             quote_coin = market[1]
@@ -47,11 +49,15 @@ class Monitor(object):
                     break
                 except Exception as e:
                     curr_tries += 1
-                    print("Failed to grab data. Error: " + str(e))
+                    print("Failed to grab data for " + str(exch_name) + " " + str(market) + ". Error: " + str(e))
+                    print(traceback.format_exc())
                     print("Attempt #: " + str(curr_tries))
             temp_store.append((exch_name, curr_data))
+        return temp_store
 
     def post_data(self, temp_store):
+        print(len(temp_store))
+        print(temp_store)
         for exch_name, curr_data in temp_store:
             insert_query = "INSERT INTO " + exch_name + " values ('{0}', {1}, {2}, '{3}', '{4}')".format(*curr_data)
             self.db.execute(insert_query)
@@ -62,15 +68,13 @@ class Monitor(object):
         total_markets = 0
         # for each exchange
         # create methods dict to run in parallel
-        methods_dict = {}
-        # create mutable temp data store for parallel processes to feed data to
-        temp_store = []
+        methods_arr = []
         for exch_name, exch_obj in self.exchanges_dict.items():
             curr_markets = self.metadata[exch_name]
-            methods_dict[self.update_data_exchanges] = [exch_name, exch_obj, curr_markets, temp_store]
+            methods_arr.append([self.update_data_exchanges, exch_name, exch_obj, curr_markets])
             total_markets += len(curr_markets)
         #run all exchanges in parrallel
-        run_methods_parallel(methods_dict)
+        temp_store = run_methods_parallel(methods_arr)
         #push data in temp store to database
         self.post_data(temp_store)
         return total_markets

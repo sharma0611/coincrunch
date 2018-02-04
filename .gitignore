@@ -10,6 +10,7 @@ logs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+research/__pycache__/
 *.py[cod]
 *$py.class
 

@@ -15,6 +15,13 @@ market_names = [bc + "_" + quotecoin for bc in basecoins]
 def init_exchange(exch_name):
     if exch_name == "gdax":
         return Coinbase()
+    if exch_name == "bitfinex":
+        return Bitfinex()
+    else:
+        exch = Exchange(exch_name)
+        exch.init_exchange()
+        return exch
+        
 
 #defining exchange class
 class Exchange(object):
@@ -23,6 +30,16 @@ class Exchange(object):
     """
     def __init__(self, exchange_name):
         self.exchange_name = exchange_name
+
+    #use if you want to initialize exchange with default attributes
+    def init_exchange(self):
+        exch = getattr(ccxt, self.exchange_name)({
+            'timeout': 20000,
+            'session': cfscrape.create_scraper(),
+            'enableRateLimit': True,
+        })
+        exch.load_markets()
+        self.exch = exch
 
     def grab_market(self, basecoin, quotecoin):
         default_market = basecoin + "/" + quotecoin
@@ -46,8 +63,14 @@ class Exchange(object):
         order_book = exch.fetch_order_book(market_sym)
         asks = order_book['asks']
         bids = order_book['bids']
-        lowest_ask = asks[0][0]
-        highest_bid = bids[0][0]
+        try:
+            lowest_ask = asks[0][0]
+            highest_bid = bids[0][0]
+        except IndexError as e:
+            print("bid or ask data not available currently for " + str(market_sym))
+            lowest_ask = None
+            highest_bid = None
+            raise e
         return [lowest_ask, highest_bid]
  
 # Define subclasses of exchanges
@@ -65,3 +88,18 @@ class Coinbase(Exchange):
         exch.load_markets()
         self.exch = exch
 
+# Define subclasses of exchanges
+class Bitfinex(Exchange):
+    """
+    Holds the Coinbase Exchange
+    """
+    def __init__(self):
+        Exchange.__init__(self, "Coinbase")
+        exch = getattr(ccxt, "bitfinex")({
+            'timeout': 20000,
+            'session': cfscrape.create_scraper(),
+            'enableRateLimit': True,
+            'rateLimit': 2500
+        })
+        exch.load_markets()
+        self.exch = exch
