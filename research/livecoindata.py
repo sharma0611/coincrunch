@@ -3,29 +3,31 @@
 import ccxt
 import time
 
-exchanges = ccxt.exchanges
-exchanges = [exch.strip() for exch in exchanges]
-print("Number of Exchanges:")
-print(len(exchanges))
+def grab_all_exchanges():
+    exchanges = ccxt.exchanges
+    exchanges = [exch.strip() for exch in exchanges]
+    print("Number of Exchanges:")
+    print(len(exchanges))
 
-#dict of exchanges & names
-markets_dict = {}
+    #dict of exchanges & names
+    markets_dict = {}
 
-#array of exchange objects
-exchange_objs = []
+    #array of exchange objects
+    exchange_objs = []
 
-for exch in exchanges:
-    print("Current Exchange: " + exch)
-    try:
-        exec(exch + " = ccxt." + exch + "()")
-        exec("exchange_objs.append(" + exch + ")")
-        exec("curr_mkts = " + exch + ".load_markets()")
-        exec("markets_dict['" + exch + "'] = curr_mkts.keys()")
-        exec("print(curr_mkts.keys())")
-    except:
-        pass
+    for exch in exchanges:
+        #print("Current Exchange: " + exch)
+        try:
+            exec(exch + " = ccxt." + exch + "()")
+            exec("exchange_objs.append(" + exch + ")")
+            exec("curr_mkts = " + exch + ".load_markets()")
+            exec("markets_dict['" + exch + "'] = curr_mkts.keys()")
+            #exec("print(curr_mkts.keys())")
+        except:
+            pass
 
-print(len(markets_dict))
+    return markets_dict
+
 
 
 
