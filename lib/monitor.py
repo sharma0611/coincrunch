@@ -5,6 +5,7 @@ from lib.exchanges import init_exchange
 from lib.multithread import run_methods_parallel
 import time
 import traceback
+from datetime import datetime
 
 #metadata:
 # {exchange_name: [(base_coin, quote_coin), (base_coin, quote_coin), ... ]
@@ -56,12 +57,16 @@ class Monitor(object):
         return temp_store
 
     def post_data(self, temp_store):
+        now = datetime.now()
         print(len(temp_store))
         print(temp_store)
         for exch_name, curr_data in temp_store:
             insert_query = "INSERT INTO " + exch_name + " values ('{0}', {1}, {2}, '{3}', '{4}')".format(*curr_data)
             self.db.execute(insert_query)
         self.db.commit()
+        end = datetime.now()
+        print("Updated DB in " + str((end-now).total_seconds()) + " s." )
+
 
     #update database for each exchange & market 
     def update_data(self):
