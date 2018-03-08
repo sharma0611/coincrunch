@@ -20,18 +20,26 @@ class ThreadWithReturnValue(Thread):
         Thread.join(self)
         return self._return
 
+def chunks(my_l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(my_l), n):
+        yield my_l[i:i + n]
+
+#This function runs up to 400 threads in parallel
 def run_methods_parallel(methods_arr):
-    proc = []
     results = []
-    for fn_and_args in methods_arr:
-        fn = fn_and_args[0]
-        args = fn_and_args[1:]
-        p = ThreadWithReturnValue(target=fn, args=args)
-        p.start()
-        proc.append(p)
-    for p in proc:
-        res = p.join() #ensure you are outputting an array
-        results = results + res #add up the arrays from all threads
+    chunks_methods_arr = list(chunks(methods_arr, 400))
+    for chunk in chunks_methods_arr:
+        proc = []
+        for fn_and_args in chunk:
+            fn = fn_and_args[0]
+            args = fn_and_args[1:]
+            p = ThreadWithReturnValue(target=fn, args=args)
+            p.start()
+            proc.append(p)
+        for p in proc:
+            res = p.join() #ensure you are outputting an array
+            results = results + res #add up the arrays from all threads
     return results
 
 #custom methods to allow multithreading of python class methods with parameters
