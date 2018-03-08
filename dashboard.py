@@ -37,7 +37,7 @@ if show_all:
 
 market_plots = []
 
-my_max = 2
+my_max = 1
 
 #for each exchange
 for exch in display_exchanges:
