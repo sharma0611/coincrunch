@@ -4,7 +4,7 @@
 #methods_dict: {class method : [args]}
 
 from threading import Thread
-from Queue import Queue
+from multiprocessing import Queue
 
 class ThreadWithReturnValue(Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
