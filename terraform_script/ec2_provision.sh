@@ -15,7 +15,6 @@ echo 'source $HOME/miniconda/bin/activate' >> $HOME/.bashrc
 
 #setup root virtualenv
 source $HOME/miniconda/bin/activate
-
-pip install -r $HOME/coincrunch/requirements.txt
+pip3 install -r $HOME/coincrunch/requirements.txt
 
 echo 'ec2_provision.sh complete' 
