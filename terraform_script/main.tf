@@ -7,7 +7,7 @@ provider "aws" {
 #  source        = "git"
 #  account       = "prod"
 #  version       = "latest"
-#  region        = "us-east-1"
+#  region        = "us-west-1"
 #  distribution  = "ubuntu1604"
 #}
 
@@ -17,7 +17,7 @@ resource "aws_key_pair" "auth" {
 }
 
 resource "aws_instance" "ec2_instance" {
-  ami                     = "ami-b2795cd7"
+  ami                     = "ami-94bdeef4"
   availability_zone       = "${var.availability_zone}"
   instance_type           = "${var.instance_type}"
   key_name = "${aws_key_pair.auth.id}"

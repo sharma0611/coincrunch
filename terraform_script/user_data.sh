@@ -18,6 +18,7 @@ apt-get install postgresql-client libpq-dev -y
 apt-get install htop -y
 apt-get install zip -y
 apt-get install git -y
+apt-get install curl -y
 
 echo "apt-get applications complete" 
 su - admin -c 'git clone -b master --single-branch https://github.com/sharma0611/coincrunch.git'
