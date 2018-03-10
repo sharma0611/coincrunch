@@ -39,7 +39,8 @@ su - admin -c 'bash ~/coincrunch/terraform_script/ec2_provision.sh'
 
 echo "user_data.sh complete" 
 
-#commands created for running of new suite
+#commands created to run program
 echo 'Now running coincrunch suite:'
 source /home/admin/.bashrc
-su - admin -c 'cd ~/coincrunch; python coincrunch.py'
+cd ~/coincrunch
+python coincrunch.py'
