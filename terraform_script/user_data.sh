@@ -42,5 +42,4 @@ echo "user_data.sh complete"
 #commands created to run program
 echo 'Now running coincrunch suite:'
 source /home/admin/.bashrc
-cd ~/coincrunch
-python coincrunch.py'
+su - admin -c 'cd $HOME/coincrunch;python coincrunch.py'
