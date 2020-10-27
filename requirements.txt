@@ -11,7 +11,7 @@ cffi==1.11.4
 cfscrape==1.9.4
 chardet==3.0.4
 conda==4.4.10
-cryptography==2.1.4
+cryptography==3.2
 idna==2.6
 idna-ssl==1.0.1
 multidict==4.1.0
