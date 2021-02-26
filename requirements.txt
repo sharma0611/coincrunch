@@ -1,6 +1,6 @@
 aiodns==1.1.1
 pathlib==1.0.1
-aiohttp==3.0.1
+aiohttp==3.7.4
 asn1crypto==0.24.0
 async-timeout==2.0.0
 attrs==17.4.0
