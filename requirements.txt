@@ -6,7 +6,7 @@ async-timeout==2.0.0
 attrs==17.4.0
 cchardet==2.1.1
 ccxt==1.11.50
-certifi==2018.1.18
+certifi==2022.12.7
 cffi==1.11.4
 cfscrape==1.9.4
 chardet==3.0.4
